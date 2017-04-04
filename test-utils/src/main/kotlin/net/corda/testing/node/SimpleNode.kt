@@ -6,7 +6,7 @@ import com.google.common.util.concurrent.SettableFuture
 import net.corda.core.crypto.composite
 import net.corda.core.crypto.generateKeyPair
 import net.corda.core.messaging.RPCOps
-import net.corda.testing.MOCK_NODE_VERSION_INFO
+import net.corda.testing.MOCK_VERSION_INFO
 import net.corda.node.services.RPCUserServiceImpl
 import net.corda.node.services.config.NodeConfiguration
 import net.corda.node.services.messaging.ArtemisMessagingServer
@@ -39,7 +39,7 @@ class SimpleNode(val config: NodeConfiguration, val address: HostAndPort = freeL
     val net = databaseTransaction(database) {
         NodeMessagingClient(
                 config,
-                MOCK_NODE_VERSION_INFO,
+                MOCK_VERSION_INFO,
                 address,
                 identity.public.composite,
                 executor,

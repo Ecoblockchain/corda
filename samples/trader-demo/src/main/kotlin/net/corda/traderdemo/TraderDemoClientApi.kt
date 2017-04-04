@@ -5,6 +5,7 @@ import net.corda.contracts.testing.calculateRandomlySizedAmounts
 import net.corda.core.contracts.Amount
 import net.corda.core.contracts.DOLLARS
 import net.corda.core.contracts.Issued
+import net.corda.core.contracts.USD
 import net.corda.core.getOrThrow
 import net.corda.core.messaging.CordaRPCOps
 import net.corda.core.messaging.startFlow
@@ -39,6 +40,7 @@ class TraderDemoClientApi(val rpc: CordaRPCOps) {
     }
 
     fun runSeller(amount: Amount<Currency> = 1000.0.DOLLARS, counterparty: String) {
+        USD
         val otherParty = rpc.partyFromName(counterparty) ?: throw IllegalStateException("Don't know $counterparty")
         // The seller will sell some commercial paper to the buyer, who will pay with (self issued) cash.
         //

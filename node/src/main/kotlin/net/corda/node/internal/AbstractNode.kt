@@ -100,7 +100,7 @@ abstract class AbstractNode(open val configuration: NodeConfiguration,
 
     protected abstract val log: Logger
     protected abstract val networkMapAddress: SingleMessageRecipient?
-    protected abstract val version: Version
+    protected abstract val platformVersion: Int
 
     // We will run as much stuff in this single thread as possible to keep the risk of thread safety bugs low during the
     // low-performance prototyping period.
@@ -293,7 +293,7 @@ abstract class AbstractNode(open val configuration: NodeConfiguration,
     private fun makeInfo(): NodeInfo {
         val advertisedServiceEntries = makeServiceEntries()
         val legalIdentity = obtainLegalIdentity()
-        return NodeInfo(net.myAddress, legalIdentity, version, advertisedServiceEntries, findMyLocation())
+        return NodeInfo(net.myAddress, legalIdentity, platformVersion, advertisedServiceEntries, findMyLocation())
     }
 
     /**
@@ -415,8 +415,8 @@ abstract class AbstractNode(open val configuration: NodeConfiguration,
         }
         val address = networkMapAddress ?: info.address
         // Register for updates, even if we're the one running the network map.
-        return sendNetworkMapRegistration(address).flatMap { response ->
-            check(response.error == null) { "Unable to register with the network map service: ${response.error}" }
+        return sendNetworkMapRegistration(address).flatMap { (error) ->
+            check(error == null) { "Unable to register with the network map service: $error" }
             // The future returned addMapService will complete on the same executor as sendNetworkMapRegistration, namely the one used by net
             services.networkMapCache.addMapService(net, address, true, null)
         }
@@ -442,7 +442,9 @@ abstract class AbstractNode(open val configuration: NodeConfiguration,
     protected open fun makeKeyManagementService(): KeyManagementService = PersistentKeyManagementService(partyKeys)
 
     open protected fun makeNetworkMapService() {
-        inNodeNetworkMapService = PersistentNetworkMapService(services)
+        val networkParameters = configuration.networkParameters
+                ?: throw IllegalArgumentException("networkParameters needs to be defined for the network map service")
+        inNodeNetworkMapService = PersistentNetworkMapService(services, networkParameters)
     }
 
     open protected fun makeNotaryService(type: ServiceType, tokenizableServices: MutableList<Any>): NotaryService {
