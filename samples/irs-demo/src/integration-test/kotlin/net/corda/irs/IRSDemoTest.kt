@@ -15,6 +15,7 @@ import net.corda.node.services.config.FullNodeConfiguration
 import net.corda.node.services.transactions.SimpleNotaryService
 import net.corda.nodeapi.User
 import net.corda.testing.IntegrationTestCategory
+import net.corda.testing.http.HttpApi
 import org.apache.commons.io.IOUtils
 import org.junit.Test
 import rx.observables.BlockingObservable
@@ -42,9 +43,15 @@ class IRSDemoTest : IntegrationTestCategory {
             ).getOrThrow()
 
             val nextFixingDates = getFixingDateObservable(nodeA.configuration)
+            val numADeals = getTradeCount(nodeAAddr)
+            val numBDeals = getTradeCount(nodeBAddr)
 
             runUploadRates(controllerAddr)
             runTrade(nodeAAddr)
+
+            assert(getTradeCount(nodeAAddr) == (numADeals + 1))
+            assert(getTradeCount(nodeBAddr) == (numBDeals + 1))
+
             // Wait until the initial trade and all scheduled fixings up to the current date have finished
             nextFixingDates.first { it == null || it > currentDate }
 
@@ -83,5 +90,11 @@ class IRSDemoTest : IntegrationTestCategory {
         val fileContents = IOUtils.toString(Thread.currentThread().contextClassLoader.getResourceAsStream("example.rates.txt"), Charsets.UTF_8.name())
         val url = URL("http://$host/upload/interest-rates")
         assert(uploadFile(url, fileContents))
+    }
+
+    private fun getTradeCount(nodeAddr: HostAndPort): Int {
+        val api = HttpApi.fromHostAndPort(nodeAddr, "api/irs")
+        val deals = api.getJson<Array<*>>("deals")
+        return deals.size
     }
 }
