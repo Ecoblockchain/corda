@@ -3,6 +3,7 @@ package net.corda.core.node.services
 import net.corda.core.contracts.PartyAndReference
 import net.corda.core.crypto.AnonymousParty
 import net.corda.core.crypto.Party
+import org.bouncycastle.asn1.x500.X500Name
 import java.security.PublicKey
 
 /**
@@ -14,7 +15,7 @@ interface IdentityService {
     fun registerIdentity(party: Party)
 
     /**
-     * Get all identities known to the service. This is expensive, and [partyFromKey] or [partyFromName] should be
+     * Get all identities known to the service. This is expensive, and [partyFromKey] or [partyFromX500Name] should be
      * used in preference where possible.
      */
     fun getAllIdentities(): Iterable<Party>
@@ -24,7 +25,9 @@ interface IdentityService {
     // but for now this is not supported.
 
     fun partyFromKey(key: PublicKey): Party?
+    @Deprecated("Use partyFromX500Name")
     fun partyFromName(name: String): Party?
+    fun partyFromX500Name(principal: X500Name): Party?
 
     fun partyFromAnonymous(party: AnonymousParty): Party?
     fun partyFromAnonymous(partyRef: PartyAndReference) = partyFromAnonymous(partyRef.party)

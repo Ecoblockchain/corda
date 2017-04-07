@@ -23,6 +23,7 @@ import net.corda.node.services.statemachine.FlowStateMachineImpl
 import net.corda.node.services.statemachine.StateMachineManager
 import net.corda.node.utilities.AddOrRemove
 import net.corda.node.utilities.databaseTransaction
+import org.bouncycastle.asn1.x500.X500Name
 import org.jetbrains.exposed.sql.Database
 import rx.Observable
 import java.io.InputStream
@@ -143,7 +144,9 @@ class CordaRPCOpsImpl(
 
     override fun waitUntilRegisteredWithNetworkMap() = services.networkMapCache.mapServiceRegistered
     override fun partyFromKey(key: PublicKey) = services.identityService.partyFromKey(key)
+    @Deprecated("Use partyFromX500Name instead")
     override fun partyFromName(name: String) = services.identityService.partyFromName(name)
+    override fun partyFromX500Name(x500Name: X500Name) = services.identityService.partyFromX500Name(x500Name)
 
     override fun registeredFlows(): List<String> = services.flowLogicRefFactory.flowWhitelist.keys.sorted()
 
