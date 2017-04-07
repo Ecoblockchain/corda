@@ -37,8 +37,10 @@ class SimmValuationTest : IntegrationTestCategory {
 
             assert(createTradeBetween(nodeAApi, nodeBParty, testTradeId))
             assert(tradeExists(nodeBApi, nodeAParty, testTradeId))
+            assert(tradeExists(nodeAApi, nodeBParty, testTradeId))
             assert(runValuationsBetween(nodeAApi, nodeBParty))
             assert(valuationExists(nodeBApi, nodeAParty))
+            assert(valuationExists(nodeAApi, nodeBParty))
         }
     }
 
