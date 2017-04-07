@@ -31,7 +31,14 @@ class TraderDemoTest : NodeBasedTest() {
             client.start(demoUser[0].username, demoUser[0].password).proxy()
         }
 
-        TraderDemoClientApi(nodeARpc).runBuyer()
-        TraderDemoClientApi(nodeBRpc).runSeller(counterparty = nodeA.info.legalIdentity.name)
+        val clientA = TraderDemoClientApi(nodeARpc)
+        val clientB = TraderDemoClientApi(nodeBRpc)
+
+        val expectedTrades = listOf(clientA.getTradeCount() + 1, clientB.getTradeCount() + 1)
+        clientA.runBuyer()
+        clientB.runSeller(counterparty = nodeA.info.legalIdentity.name)
+        val actualTrades = listOf(clientA.getTradeCount(), clientB.getTradeCount())
+        actualTrades.forEach { println(it) }
+        assert(actualTrades == expectedTrades)
     }
 }
