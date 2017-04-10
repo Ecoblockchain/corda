@@ -37,16 +37,17 @@ class TraderDemoTest : NodeBasedTest() {
         val originalACash = clientA.getCashCount() // A has random number of issued amount
         val expectedBCash = clientB.getCashCount() + 1
         val expectedPaper = listOf(clientA.getCommercialPaperCount() + 1, clientB.getCommercialPaperCount())
+        val expectedAmounts = listOf(2900000L, 100000L)
 
         clientA.runBuyer()
         clientB.runSeller(counterparty = nodeA.info.legalIdentity.name)
-        
+
         val actualCash = listOf(clientA.getCashCount(), clientB.getCashCount())
         val actualPaper = listOf(clientA.getCommercialPaperCount(), clientB.getCommercialPaperCount())
+        val actualAmounts = listOf(clientA.getDollarCashBalance(), clientB.getDollarCashBalance()).map { it.quantity }
         assert(actualCash[0] > originalACash)
         assert(actualCash[1] == expectedBCash)
         assert(actualPaper == expectedPaper)
-        assert(clientA.getDollarCashBalance().quantity == 29000L)
-        assert(clientB.getDollarCashBalance().quantity == 1000L)
+        assert(actualAmounts == expectedAmounts)
     }
 }
