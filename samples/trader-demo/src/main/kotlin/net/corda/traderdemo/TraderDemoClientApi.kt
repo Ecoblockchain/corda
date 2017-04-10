@@ -2,6 +2,7 @@ package net.corda.traderdemo
 
 import com.google.common.util.concurrent.Futures
 import net.corda.contracts.CommercialPaper
+import net.corda.contracts.asset.Cash
 import net.corda.contracts.testing.calculateRandomlySizedAmounts
 import net.corda.core.contracts.Amount
 import net.corda.core.contracts.DOLLARS
@@ -27,7 +28,15 @@ class TraderDemoClientApi(val rpc: CordaRPCOps) {
         val logger = loggerFor<TraderDemoClientApi>()
     }
 
-    fun getTradeCount(): Int {
+    fun getCashCount(): Int {
+        return rpc.vaultAndUpdates().first.filterStatesOfType<Cash.State>().size
+    }
+
+    fun getDollarCashBalance(): Amount<Currency> {
+        return rpc.getCashBalances()[Currency.getInstance("USD")]!!
+    }
+
+    fun getCommercialPaperCount(): Int {
         return rpc.vaultAndUpdates().first.filterStatesOfType<CommercialPaper.State>().size
     }
 
