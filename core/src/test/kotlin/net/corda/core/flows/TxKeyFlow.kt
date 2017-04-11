@@ -51,7 +51,7 @@ object TxKeyFlow {
 
         @Suspendable
         override fun call(): CompositeKey {
-            progressTracker.currentStep == SENDING_KEY
+            progressTracker.currentStep = SENDING_KEY
             return TxKeyFlowUtilities.provideKey(this, otherSide)
         }
     }

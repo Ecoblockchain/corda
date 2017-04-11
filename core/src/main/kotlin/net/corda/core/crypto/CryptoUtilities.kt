@@ -8,6 +8,7 @@ import net.i2p.crypto.eddsa.EdDSAEngine
 import net.i2p.crypto.eddsa.EdDSAPrivateKey
 import net.i2p.crypto.eddsa.EdDSAPublicKey
 import net.i2p.crypto.eddsa.KeyPairGenerator
+import net.i2p.crypto.eddsa.spec.EdDSANamedCurveSpec
 import net.i2p.crypto.eddsa.spec.EdDSANamedCurveTable
 import net.i2p.crypto.eddsa.spec.EdDSAPrivateKeySpec
 import net.i2p.crypto.eddsa.spec.EdDSAPublicKeySpec
@@ -70,10 +71,10 @@ fun PrivateKey.signWithECDSA(bytesToSign: ByteArray, publicKey: PublicKey): Digi
     return DigitalSignature.WithKey(publicKey, signWithECDSA(bytesToSign).bytes)
 }
 
-val ed25519Curve = EdDSANamedCurveTable.getByName(EdDSANamedCurveTable.CURVE_ED25519_SHA512)
+val ed25519Curve: EdDSANamedCurveSpec = EdDSANamedCurveTable.getByName(EdDSANamedCurveTable.CURVE_ED25519_SHA512)
 
 fun parsePublicKeyBase58(base58String: String) = EdDSAPublicKey(EdDSAPublicKeySpec(Base58.decode(base58String), ed25519Curve))
-fun PublicKey.toBase58String() = Base58.encode((this as EdDSAPublicKey).abyte)
+fun PublicKey.toBase58String(): String = Base58.encode((this as EdDSAPublicKey).abyte)
 
 fun KeyPair.signWithECDSA(bytesToSign: ByteArray) = private.signWithECDSA(bytesToSign, public)
 fun KeyPair.signWithECDSA(bytesToSign: OpaqueBytes) = private.signWithECDSA(bytesToSign.bytes, public)
@@ -89,7 +90,7 @@ fun PublicKey.verifyWithECDSA(content: ByteArray, signature: DigitalSignature) {
     val verifier = EdDSAEngine()
     verifier.initVerify(this)
     verifier.update(content)
-    if (verifier.verify(signature.bytes) == false)
+    if (!verifier.verify(signature.bytes))
         throw SignatureException("Signature did not match")
 }
 
@@ -107,9 +108,9 @@ val PublicKey.composite: CompositeKey get() = CompositeKey.Leaf(this)
 fun Iterable<DigitalSignature.WithKey>.byKeys() = map { it.by }.toSet()
 
 // Allow Kotlin destructuring:    val (private, public) = keyPair
-operator fun KeyPair.component1() = this.private
+operator fun KeyPair.component1(): PrivateKey = this.private
 
-operator fun KeyPair.component2() = this.public
+operator fun KeyPair.component2(): PublicKey = this.public
 
 /** A simple wrapper that will make it easier to swap out the EC algorithm we use in future */
 fun generateKeyPair(): KeyPair = KeyPairGenerator().generateKeyPair()
