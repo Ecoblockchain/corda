@@ -2,12 +2,14 @@ package net.corda.core.node
 
 import net.corda.core.messaging.CordaRPCOps
 import net.corda.core.serialization.SerializationCustomization
+import net.corda.core.serialization.SingletonSerializeAsToken
 import java.util.function.Function
 
 /**
  * Implement this interface on a class advertised in a META-INF/services/net.corda.core.node.CordaPluginRegistry file
  * to extend a Corda node with additional application services.
  */
+// TODO Rename this to CorDapp
 abstract class CordaPluginRegistry(
         /**
          * List of lambdas returning JAX-RS objects. They may only depend on the RPC interface, as the webserver should
@@ -31,18 +33,21 @@ abstract class CordaPluginRegistry(
          */
         open val requiredFlows: Map<String, Set<String>> = emptyMap(),
 
-        /**
-         * List of lambdas constructing additional long lived services to be hosted within the node.
-         * They expect a single [PluginServiceHub] parameter as input.
-         * The [PluginServiceHub] will be fully constructed before the plugin service is created and will
-         * allow access to the Flow factory and Flow initiation entry points there.
-         */
+        @Deprecated("This will be removed in a future release. Override the initialise method.")
         open val servicePlugins: List<Function<PluginServiceHub, out Any>> = emptyList()
-) {
+) : SingletonSerializeAsToken() {
+    /**
+     * Initialise the plugin on node startup.
+     * The [PluginServiceHub] will be fully constructed before the plugin service is created and will
+     * allow access to the Flow factory and Flow initiation entry points there.
+     */
+    @Suppress("DEPRECATION")
+    open fun initialise(serviceHub: PluginServiceHub): Unit = servicePlugins.forEach { it.apply(serviceHub) }
+
     /**
      * Optionally whitelist types for use in object serialization, as we lock down the types that can be serialized.
      *
-     * For example, if you add a new [ContractState] it needs to be whitelisted.  You can do that either by
+     * For example, if you add a new [net.corda.core.contracts.ContractState] it needs to be whitelisted.  You can do that either by
      * adding the @CordaSerializable annotation or via this method.
      **
      * @return true if you register types, otherwise you will be filtered out of the list of plugins considered in future.

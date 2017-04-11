@@ -49,7 +49,7 @@ class NodeInterestRatesTest {
     val DUMMY_CASH_ISSUER_KEY = generateKeyPair()
     val DUMMY_CASH_ISSUER = Party("Cash issuer", DUMMY_CASH_ISSUER_KEY.public)
 
-    val clock = Clock.systemUTC()
+    val clock: Clock = Clock.systemUTC()
     lateinit var oracle: NodeInterestRates.Oracle
     lateinit var dataSource: Closeable
     lateinit var database: Database
@@ -208,7 +208,7 @@ class NodeInterestRatesTest {
         val n1 = net.createNotaryNode()
         val n2 = net.createNode(n1.info.address, advertisedServices = ServiceInfo(NodeInterestRates.type))
         databaseTransaction(n2.database) {
-            n2.findService<NodeInterestRates.Service>().oracle.knownFixes = TEST_DATA
+            n2.pluginRegistries.filterIsInstance<NodeInterestRates>().single().oracle.knownFixes = TEST_DATA
         }
         val tx = TransactionType.General.Builder(null)
         val fixOf = NodeInterestRates.parseFixOf("LIBOR 2016-03-16 1M")

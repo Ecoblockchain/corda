@@ -127,7 +127,7 @@ abstract class Simulation(val networkSendManuallyPumped: Boolean,
                     super.start()
                     javaClass.classLoader.getResourceAsStream("example.rates.txt").use {
                         databaseTransaction(database) {
-                            findService<NodeInterestRates.Service>().upload(it)
+                            pluginRegistries.filterIsInstance<NodeInterestRates>().single().upload(it)
                         }
                     }
                     return this

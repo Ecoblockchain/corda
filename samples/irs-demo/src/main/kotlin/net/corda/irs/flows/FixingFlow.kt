@@ -7,7 +7,6 @@ import net.corda.core.crypto.CompositeKey
 import net.corda.core.crypto.Party
 import net.corda.core.flows.FlowLogic
 import net.corda.core.node.NodeInfo
-import net.corda.core.node.PluginServiceHub
 import net.corda.core.node.services.ServiceType
 import net.corda.core.seconds
 import net.corda.core.serialization.CordaSerializable
@@ -19,12 +18,6 @@ import java.math.BigDecimal
 import java.security.KeyPair
 
 object FixingFlow {
-
-    class Service(services: PluginServiceHub) {
-        init {
-            services.registerFlowInitiator(Floater::class.java) { Fixer(it) }
-        }
-    }
 
     /**
      * One side of the fixing flow for an interest rate swap, but could easily be generalised further.
